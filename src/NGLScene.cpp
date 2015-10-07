@@ -13,7 +13,7 @@
 
 
 
-NGLScene::NGLScene(QWindow *_parent) : OpenGLWindow(_parent)
+NGLScene::NGLScene()
 {
   setTitle("Box2D and NGL");
 
@@ -22,22 +22,14 @@ NGLScene::NGLScene(QWindow *_parent) : OpenGLWindow(_parent)
 
 NGLScene::~NGLScene()
 {
-  ngl::NGLInit *Init = ngl::NGLInit::instance();
   std::cout<<"Shutting down NGL, removing VAO's and Shaders\n";
-  Init->NGLQuit();
   delete m_world;
 }
 
-void NGLScene::resizeEvent(QResizeEvent *_event )
+void NGLScene::resizeGL(int _w, int _h)
 {
-  if(isExposed())
-  {
-  int w=_event->size().width();
-  int h=_event->size().height();
-  // set the viewport for openGL
-  glViewport(0,0,w,h);
-  renderLater();
-  }
+  glViewport(0,0,_w,_h);
+  update();
 }
 
 void NGLScene::createBodies()
@@ -85,7 +77,7 @@ void NGLScene::createBodies()
 }
 
 
-void NGLScene::initialize()
+void NGLScene::initializeGL()
 {
   // we must call this first before any other GL commands to load and link the
   // gl commands from the lib, if this is not done program will crash
@@ -162,7 +154,7 @@ void NGLScene::loadMatricesToShader()
 
 }
 
-void NGLScene::render()
+void NGLScene::paintGL()
 {
   // clear the screen and depth buffer
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -267,7 +259,7 @@ void NGLScene::keyPressEvent(QKeyEvent *_event)
   // finally update the GLWindow and re-draw
   //if (isExposed())
 
-    renderLater();
+    update();
 }
 
 void NGLScene::keyReleaseEvent( QKeyEvent *_event	)
@@ -315,7 +307,7 @@ void NGLScene::timerEvent( QTimerEvent *_event)
 
   }
 
-  renderLater();
+  update();
 }
 
 
