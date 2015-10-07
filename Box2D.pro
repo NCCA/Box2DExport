@@ -33,56 +33,12 @@ CONFIG += console
 linux*:INCLUDEPATH+=/public/devel/Box2D/include
 linux*:LIBS+=-L/public/devel/Box2D/lib
 LIBS+=-lBox2D
-# note each command you add needs a ; as it will be run as a single line
-# first check if we are shadow building or not easiest way is to check out against current
-!equals(PWD, $${OUT_PWD}){
-	copydata.commands = echo "creating destination dirs" ;
-	# now make a dir
-	#copydata.commands += mkdir -p $$OUT_PWD/shaders ;
-	copydata.commands += echo "copying files" ;
-	# then copy the files
-	#copydata.commands += $(COPY_DIR) $$PWD/shaders/* $$OUT_PWD/shaders/ ;
-	# now make sure the first target is built before copy
-	first.depends = $(first) copydata
-	export(first.depends)
-	export(copydata.commands)
-	# now add it as an extra target
-	QMAKE_EXTRA_TARGETS += first copydata
+NGLPATH=$$(NGLDIR)
+isEmpty(NGLPATH){ # note brace must be here
+	message("including $HOME/NGL")
+	include($(HOME)/NGL/UseNGL.pri)
 }
-# use this to suppress some warning from boost
-QMAKE_CXXFLAGS_WARN_ON += "-Wno-unused-parameter"
-# basic compiler flags (not all appropriate for all platforms)
-QMAKE_CXXFLAGS+= -msse -msse2 -msse3
-macx:QMAKE_CXXFLAGS+= -arch x86_64
-macx:INCLUDEPATH+=/usr/local/include/
-linux-g++:QMAKE_CXXFLAGS +=  -march=native
-linux-g++-64:QMAKE_CXXFLAGS +=  -march=native
-# define the _DEBUG flag for the graphics lib
-DEFINES +=NGL_DEBUG
-
-unix:LIBS += -L/usr/local/lib
-# add the ngl lib
-unix:LIBS +=  -L/$(HOME)/NGL/lib -l NGL
-
-# now if we are under unix and not on a Mac (i.e. linux)
-linux-*{
-		linux-*:QMAKE_CXXFLAGS +=  -march=native
-		DEFINES += LINUX
+else{ # note brace must be here
+	message("Using custom NGL location")
+	include($(NGLDIR)/UseNGL.pri)
 }
-DEPENDPATH+=include
-# if we are on a mac define DARWIN
-macx:DEFINES += DARWIN
-# this is where to look for includes
-INCLUDEPATH += $$(HOME)/NGL/include/
-
-win32: {
-        PRE_TARGETDEPS+=C:/NGL/lib/NGL.lib
-        INCLUDEPATH+=-I c:/boost
-        DEFINES+=GL42
-        DEFINES += WIN32
-        DEFINES+=_WIN32
-        DEFINES+=_USE_MATH_DEFINES
-        LIBS += -LC:/NGL/lib/ -lNGL
-        DEFINES+=NO_DLL
-}
-
