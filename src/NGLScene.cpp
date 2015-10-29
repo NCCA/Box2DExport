@@ -23,13 +23,13 @@ NGLScene::NGLScene()
 NGLScene::~NGLScene()
 {
   std::cout<<"Shutting down NGL, removing VAO's and Shaders\n";
-  delete m_world;
 }
 
-void NGLScene::resizeGL(int _w, int _h)
+void NGLScene::resizeGL(QResizeEvent *_event)
 {
-  glViewport(0,0,_w,_h);
-  update();
+
+  m_width=_event->size().width()*devicePixelRatio();
+  m_height=_event->size().height()*devicePixelRatio();
 }
 
 void NGLScene::createBodies()
@@ -107,7 +107,7 @@ void NGLScene::initializeGL()
   m_view=ngl::lookAt(from,to,up);
   // box2d physic setup first gravity down in the y
   b2Vec2 gravity(0.0f, -20.0f);
-  m_world= new b2World(gravity);
+  m_world.reset(new b2World(gravity));
 
   // now for our actor
   b2BodyDef bodyDef;
@@ -156,6 +156,7 @@ void NGLScene::loadMatricesToShader()
 
 void NGLScene::paintGL()
 {
+  glViewport(0,0,m_width,m_height);
   // clear the screen and depth buffer
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -168,16 +169,17 @@ void NGLScene::paintGL()
   ngl::VAOPrimitives *prim=ngl::VAOPrimitives::instance();
 
   // static bodies
-  for(unsigned int i=0; i<m_bsodies.size(); ++i)
+  //for(unsigned int i=0; i<m_bsodies.size(); ++i)
+  for(auto body : m_bsodies)
   {
     m_transform.reset();
     {
-      b2Vec2 position = m_bsodies[i].body->GetPosition();
+      b2Vec2 position = body.body->GetPosition();
 
       shader->setShaderParam4f("Colour",0.0f,0.0f,1.0f,1.0f);
-      m_transform.setScale(m_bsodies[i].width,m_bsodies[i].height,0.1);
+      m_transform.setScale(body.width,body.height,0.1);
       m_transform.setPosition(position.x,position.y,0);
-      m_transform.setRotation(0,0,ngl::degrees(m_bsodies[i].body->GetAngle()));
+      m_transform.setRotation(0,0,ngl::degrees(body.body->GetAngle()));
 
       loadMatricesToShader();
       prim->draw("cube");
