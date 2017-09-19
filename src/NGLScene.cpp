@@ -10,13 +10,9 @@
 #include <ngl/VAOPrimitives.h>
 #include <ngl/ShaderLib.h>
 
-
-
-
 NGLScene::NGLScene()
 {
   setTitle("Box2D and NGL");
-
 }
 
 
@@ -25,12 +21,7 @@ NGLScene::~NGLScene()
   std::cout<<"Shutting down NGL, removing VAO's and Shaders\n";
 }
 
-void NGLScene::resizeGL(QResizeEvent *_event)
-{
 
-  m_width=_event->size().width()*devicePixelRatio();
-  m_height=_event->size().height()*devicePixelRatio();
-}
 
 void NGLScene::resizeGL(int _w , int _h)
 {
@@ -99,9 +90,9 @@ void NGLScene::initializeGL()
   ngl::ShaderLib *shader=ngl::ShaderLib::instance();
 
   (*shader)["nglDiffuseShader"]->use();
-  shader->setShaderParam4f("Colour",1,1,0,1);
-  shader->setShaderParam3f("lightPos",0.2,0.2,1);
-  shader->setShaderParam4f("lightDiffuse",1,1,1,1);
+  shader->setUniform("Colour",1.0f,1.0f,0.0f,1.0f);
+  shader->setUniform("lightPos",0.2f,0.2f,1.0f);
+  shader->setUniform("lightDiffuse",1.0f,1.0f,1.0f,1.0f);
 
   // as re-size is not explicitly called we need to do this.
   glViewport(0,0,width(),height());
@@ -154,8 +145,8 @@ void NGLScene::loadMatricesToShader()
   MVP= m_transform.getMatrix()*m_view*m_projection;
   normalMatrix=m_transform.getMatrix()*m_view;
   normalMatrix.inverse();
-  shader->setRegisteredUniform("MVP",MVP);
-  shader->setRegisteredUniform("normalMatrix",normalMatrix);
+  shader->setUniform("MVP",MVP);
+  shader->setUniform("normalMatrix",normalMatrix);
 
 }
 
@@ -181,7 +172,7 @@ void NGLScene::paintGL()
     {
       b2Vec2 position = body.body->GetPosition();
 
-      shader->setShaderParam4f("Colour",0.0f,0.0f,1.0f,1.0f);
+      shader->setUniform("Colour",0.0f,0.0f,1.0f,1.0f);
       m_transform.setScale(body.width,body.height,0.1);
       m_transform.setPosition(position.x,position.y,0);
       m_transform.setRotation(0,0,ngl::degrees(body.body->GetAngle()));
@@ -198,7 +189,7 @@ void NGLScene::paintGL()
     b2Vec2 position = m_body->GetPosition();
     float32 angle= ngl::degrees(m_body->GetAngle());
 
-    shader->setShaderParam4f("Colour",1.0f,0.0f,0.0f,1.0f);
+    shader->setUniform("Colour",1.0f,0.0f,0.0f,1.0f);
     m_transform.setScale(2.0f,2.0f,0.1f);
     m_transform.setPosition(position.x,position.y,0);
     m_transform.addRotation(0,0,angle);
