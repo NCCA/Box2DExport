@@ -2,10 +2,7 @@
 #include <QGuiApplication>
 
 #include "NGLScene.h"
-#include <ngl/Camera.h>
-#include <ngl/Light.h>
 #include <ngl/Transformation.h>
-#include <ngl/Material.h>
 #include <ngl/NGLInit.h>
 #include <ngl/VAOPrimitives.h>
 #include <ngl/ShaderLib.h>
@@ -31,43 +28,42 @@ void NGLScene::resizeGL(int _w , int _h)
 void NGLScene::createBodies()
 {
 	/// this data has been exported from the maya script in the main project dir
-	Body bodies[]=
+  std::array<Body,12> bodies=
 	{
-		{ 0,"pCube1",0.0f,-5.75734941405f,40.0f,0.622222219046f,0.0f,0.2f,0.0f,0.0f,b2_staticBody },
-		{ 0,"pCube2",-15.1802719259f,-0.774503669689f,5.0f,1.0f,0.0f,0.2f,0.0f,0.0f,b2_staticBody },
-		{ 0,"pCube3",13.3989134856f,-0.619602935751f,5.0f,1.0f,0.0f,0.2f,0.0f,0.0f,b2_staticBody },
-		{ 0,"pCube4",-0.619602935751f,-0.464702201813f,5.0f,1.0f,0.0f,0.2f,0.0f,0.0f,b2_kinematicBody },
-		{ 0,"pCube5",0.0f,3.4852665136f,5.0f,1.0f,0.0f,0.2f,0.0f,0.0f,b2_staticBody },
-		{ 0,"pCube6",7.12543376114f,6.19602935751f,5.0f,1.0f,0.0f,0.2f,0.0f,0.0f,b2_staticBody },
-		{ 0,"pCube7",-8.82934183445f,8.2097388987f,5.0f,1.0f,0.0f,0.2f,0.0f,0.0f,b2_staticBody },
-		{ 0,"pCube8",-19.6723932101f,17.2714318341f,1.0f,1.0f,0.0f,0.2f,0.0f,0.0f,b2_dynamicBody },
-		{ 0,"pCube9",-11.2303032105f,17.1939814671f,1.0f,1.0f,0.0f,0.2f,0.0f,0.0f,b2_dynamicBody },
-		{ 0,"pCube10",1.31665623847f,17.7361340359f,1.0f,1.0f,0.0f,0.2f,0.0f,0.0f,b2_dynamicBody },
-		{ 0,"pCube11",13.4763638526f,9.83619660505f,5.0f,1.0f,45.0f,0.2f,0.0f,0.0f,b2_staticBody },
-		{ 0,"pCube12",7.82248706386f,-2.78821321088f,5.0f,1.0f,45.0f,0.2f,0.0f,0.0f,b2_staticBody },
+    {{ nullptr,"pCube1",0.0f,-5.75734941405f,40.0f,0.622222219046f,0.0f,0.2f,0.0f,0.0f,b2_staticBody },
+    { nullptr,"pCube2",-15.1802719259f,-0.774503669689f,5.0f,1.0f,0.0f,0.2f,0.0f,0.0f,b2_staticBody },
+    { nullptr,"pCube3",13.3989134856f,-0.619602935751f,5.0f,1.0f,0.0f,0.2f,0.0f,0.0f,b2_staticBody },
+    { nullptr,"pCube4",-0.619602935751f,-0.464702201813f,5.0f,1.0f,0.0f,0.2f,0.0f,0.0f,b2_kinematicBody },
+    { nullptr,"pCube5",0.0f,3.4852665136f,5.0f,1.0f,0.0f,0.2f,0.0f,0.0f,b2_staticBody },
+    { nullptr,"pCube6",7.12543376114f,6.19602935751f,5.0f,1.0f,0.0f,0.2f,0.0f,0.0f,b2_staticBody },
+    { nullptr,"pCube7",-8.82934183445f,8.2097388987f,5.0f,1.0f,0.0f,0.2f,0.0f,0.0f,b2_staticBody },
+    { nullptr,"pCube8",-19.6723932101f,17.2714318341f,1.0f,1.0f,0.0f,0.2f,0.0f,0.0f,b2_dynamicBody },
+    { nullptr,"pCube9",-11.2303032105f,17.1939814671f,1.0f,1.0f,0.0f,0.2f,0.0f,0.0f,b2_dynamicBody },
+    { nullptr,"pCube10",1.31665623847f,17.7361340359f,1.0f,1.0f,0.0f,0.2f,0.0f,0.0f,b2_dynamicBody },
+    { nullptr,"pCube11",13.4763638526f,9.83619660505f,5.0f,1.0f,45.0f,0.2f,0.0f,0.0f,b2_staticBody },
+    { nullptr,"pCube12",7.82248706386f,-2.78821321088f,5.0f,1.0f,45.0f,0.2f,0.0f,0.0f,b2_staticBody }},
 	};
-	const static int numBodies=12;
-	for(int i=0; i<numBodies; ++i)
+  for(auto &body : bodies)
 	{
 		b2BodyDef bodyDef;
-		bodyDef.position.Set(bodies[i].tx, bodies[i].ty);
-		bodyDef.type=bodies[i].type;
-		bodyDef.angle=ngl::radians(bodies[i].rotation);
-		b2Body* body = m_world->CreateBody(&bodyDef);
+    bodyDef.position.Set(body.tx,body.ty);
+    bodyDef.type=body.type;
+    bodyDef.angle=ngl::radians(body.rotation);
+    b2Body* b = m_world->CreateBody(&bodyDef);
 
 
     b2PolygonShape box;
     // half width for box def
-    box.SetAsBox(bodies[i].width/2.0,bodies[i].height/2.0);
-    body->CreateFixture(&box, 0.0f);
+    box.SetAsBox(body.width/2.0,body.height/2.0);
+    b->CreateFixture(&box, 0.0f);
     b2FixtureDef fixtureDef;
     fixtureDef.shape = &box;
-    fixtureDef.density = bodies[i].density;
-    fixtureDef.friction = bodies[i].friction;
+    fixtureDef.density = body.density;
+    fixtureDef.friction = body.friction;
     // make it bouncy
-    fixtureDef.restitution=bodies[i].restitution;
-    bodies[i].body=body;
-    m_bsodies.push_back(bodies[i]);
+    fixtureDef.restitution=body.restitution;
+    body.body=b;
+    m_bodies.push_back(body);
   }
 
 }
@@ -166,7 +162,7 @@ void NGLScene::paintGL()
 
   // static bodies
   //for(unsigned int i=0; i<m_bsodies.size(); ++i)
-  for(auto body : m_bsodies)
+  for(auto body : m_bodies)
   {
     m_transform.reset();
     {

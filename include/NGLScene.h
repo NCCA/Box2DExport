@@ -1,13 +1,10 @@
 #ifndef NGLSCENE_H_
 #define NGLSCENE_H_
-#include <ngl/Camera.h>
-#include <ngl/Colour.h>
-#include <ngl/Light.h>
+#include <QOpenGLWindow>
+#include <QSet>
 #include <ngl/Transformation.h>
 #include <ngl/Text.h>
 #include <Box2D/Box2D.h>
-#include <QOpenGLWindow>
-#include <QSet>
 #include <memory>
 //----------------------------------------------------------------------------------------------------------------------
 /// @file NGLScene.h
@@ -33,7 +30,7 @@ class NGLScene : public QOpenGLWindow
     //----------------------------------------------------------------------------------------------------------------------
     /// @brief dtor must close down ngl and release OpenGL resources
     //----------------------------------------------------------------------------------------------------------------------
-    ~NGLScene();
+    ~NGLScene() override;
     //----------------------------------------------------------------------------------------------------------------------
     /// @brief the initialize class is called once when the window is created and we have a valid GL context
     /// use this to setup any default GL stuff
@@ -66,7 +63,7 @@ class NGLScene : public QOpenGLWindow
 private:
     void createBodies();
 
-    std::vector <Body> m_bsodies;
+    std::vector <Body> m_bodies;
     QSet<Qt::Key> m_keysPressed;
     //----------------------------------------------------------------------------------------------------------------------
     /// @brief view matrix
