@@ -1,10 +1,10 @@
 #ifndef NGLSCENE_H_
 #define NGLSCENE_H_
-#include <QOpenGLWindow>
-#include <QSet>
 #include <ngl/Transformation.h>
 #include <ngl/Text.h>
 #include <Box2D/Box2D.h>
+#include <QOpenGLWindow>
+#include <QSet>
 #include <memory>
 //----------------------------------------------------------------------------------------------------------------------
 /// @file NGLScene.h

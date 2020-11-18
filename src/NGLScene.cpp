@@ -73,7 +73,7 @@ void NGLScene::initializeGL()
 {
   // we must call this first before any other GL commands to load and link the
   // gl commands from the lib, if this is not done program will crash
-  ngl::NGLInit::instance();
+  ngl::NGLInit::initialize();
 
   glClearColor(0.4f, 0.4f, 0.4f, 1.0f);			   // Grey Background
   // enable depth testing for drawing
@@ -81,14 +81,10 @@ void NGLScene::initializeGL()
   // enable multisampling for smoother drawing
   glEnable(GL_MULTISAMPLE);
 
-  // now to load the shader and set the values
-  // grab an instance of shader manager
-  ngl::ShaderLib *shader=ngl::ShaderLib::instance();
-
-  (*shader)["nglDiffuseShader"]->use();
-  shader->setUniform("Colour",1.0f,1.0f,0.0f,1.0f);
-  shader->setUniform("lightPos",0.2f,0.2f,1.0f);
-  shader->setUniform("lightDiffuse",1.0f,1.0f,1.0f,1.0f);
+  ngl::ShaderLib::use("nglDiffuseShader");
+  ngl::ShaderLib::setUniform("Colour",1.0f,1.0f,0.0f,1.0f);
+  ngl::ShaderLib::setUniform("lightPos",0.2f,0.2f,1.0f);
+  ngl::ShaderLib::setUniform("lightDiffuse",1.0f,1.0f,1.0f,1.0f);
 
   // as re-size is not explicitly called we need to do this.
   glViewport(0,0,width(),height());
@@ -133,16 +129,13 @@ void NGLScene::initializeGL()
 
 void NGLScene::loadMatricesToShader()
 {
-
-  ngl::ShaderLib *shader=ngl::ShaderLib::instance();
-
   ngl::Mat4 MVP;
   ngl::Mat3 normalMatrix;
   MVP= m_projection * m_view * m_transform.getMatrix();
   normalMatrix=m_view *m_transform.getMatrix();
   normalMatrix.inverse().transpose();
-  shader->setUniform("MVP",MVP);
-  shader->setUniform("normalMatrix",normalMatrix);
+  ngl::ShaderLib::setUniform("MVP",MVP);
+  ngl::ShaderLib::setUniform("normalMatrix",normalMatrix);
 
 }
 
@@ -152,29 +145,23 @@ void NGLScene::paintGL()
   // clear the screen and depth buffer
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-  // grab an instance of the shader manager
-  ngl::ShaderLib *shader=ngl::ShaderLib::instance();
-  (*shader)["nglDiffuseShader"]->use();
-
-
-   // get the VBO instance and draw the built in teapot
-  ngl::VAOPrimitives *prim=ngl::VAOPrimitives::instance();
+  ngl::ShaderLib::use("nglDiffuseShader");
 
   // static bodies
-  //for(unsigned int i=0; i<m_bsodies.size(); ++i)
+
   for(auto body : m_bodies)
   {
     m_transform.reset();
     {
       b2Vec2 position = body.body->GetPosition();
 
-      shader->setUniform("Colour",0.0f,0.0f,1.0f,1.0f);
+      ngl::ShaderLib::setUniform("Colour",0.0f,0.0f,1.0f,1.0f);
       m_transform.setScale(body.width,body.height,0.1);
       m_transform.setPosition(position.x,position.y,0);
       m_transform.setRotation(0,0,ngl::degrees(body.body->GetAngle()));
 
       loadMatricesToShader();
-      prim->draw("cube");
+      ngl::VAOPrimitives::draw("cube");
     }
   }
 
@@ -183,14 +170,14 @@ void NGLScene::paintGL()
   m_transform.reset();
   {
     b2Vec2 position = m_body->GetPosition();
-    float32 angle= ngl::degrees(m_body->GetAngle());
+    auto angle= ngl::degrees(m_body->GetAngle());
 
-    shader->setUniform("Colour",1.0f,0.0f,0.0f,1.0f);
+    ngl::ShaderLib::setUniform("Colour",1.0f,0.0f,0.0f,1.0f);
     m_transform.setScale(2.0f,2.0f,0.1f);
     m_transform.setPosition(position.x,position.y,0);
     m_transform.addRotation(0,0,angle);
     loadMatricesToShader();
-    prim->draw("cube");
+    ngl::VAOPrimitives::draw("cube");
   }
 
 
@@ -265,7 +252,7 @@ void NGLScene::keyReleaseEvent( QKeyEvent *_event	)
 
 void NGLScene::timerEvent( QTimerEvent *_event)
 {
-  float32 timeStep = 1.0f / 60.0f;
+  auto timeStep = 1.0f / 60.0f;
   int32 velocityIterations = 6;
   int32 positionIterations = 2;
   m_world->Step(timeStep, velocityIterations, positionIterations);
